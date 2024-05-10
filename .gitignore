@@ -1,0 +1,42 @@
+# Default files to ignore
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build output
+dist/
+build/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+logs/
+
+# Dependency directories
+jspm_packages/
+bower_components/
+
+# Testing
+coverage/
+
+# environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Tests
+coverage/
+
+# Misc
+snippets.js
