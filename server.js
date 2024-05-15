@@ -1,21 +1,50 @@
 require('dotenv').config();
 const app = require('express')();
-const { DB } = require('nap-db ');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const morgan = require('morgan');
+const { createLogger, format, transports } = require('winston');
+
+
 
 const port = process.env.PORT || 3000;
-
-// Initialize the database
-const connection = {
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  name: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+const host = process.env.HOST || 'localhost';
+corsOptions = {
+  origin: `http://${host}:${port}`,
+  optionsSuccessStatus: 200,
 };
 
-const repositories = {};
+const logger = createLogger({
+  level: 'info',
+  format: format.combine(
+    format.timestamp({
+      format: 'YYYY-MM-DD HH:mm:ss',
+    }),
+    format.errors({ stack: true }),
+    format.colorize(),
+    format.splat(),
+    format.json()
+  ),
+  transports: [
+    new transports.Console(),
+    new transports.File({ filename: 'combined.log' }),
+    new transports.File({ filename: 'error.log', level: 'error' }),
+    new transports.File({ filename: 'debug.log', level: 'debug' }),
+  ],
+});
 
-const db = DB.init(connection, repositories);
+
+
+app.use(morgan('dev'));
+// app.use(morgan('combined', { stream: logger.stream }));
+
+app.use(cors(corsOptions));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+
+
 
 
 // Simple test of "/" route
@@ -29,5 +58,5 @@ app.listen(port, (err) => {
   if (err) {
     return console.log('Error in server setup: ', err);
   }
-  console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on http://${host}:${port}`);
 });
