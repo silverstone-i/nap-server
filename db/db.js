@@ -20,6 +20,5 @@ const repositories = {
 };
 
 const db = DB.init(connection, repositories);
-console.log(db.employees);
 
 module.exports = db;
