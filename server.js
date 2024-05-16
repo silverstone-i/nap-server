@@ -4,7 +4,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const morgan = require('morgan');
 const { createLogger, format, transports } = require('winston');
-
+const passport = require('./auth/passportSetup');
+const routes = require('./routes/routes');
 
 
 const port = process.env.PORT || 3000;
@@ -33,8 +34,6 @@ const logger = createLogger({
   ],
 });
 
-
-
 app.use(morgan('dev'));
 // app.use(morgan('combined', { stream: logger.stream }));
 
@@ -47,11 +46,22 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 
-// Simple test of "/" route
+// Simple test of "/" route - sytem health check
 app.get('/', (req, res) => {
   res.send(
     '<h1 style="background-color: #6d426d; color: #fff; padding: 20px; text-align: center;">Connected to nap server!</h1>'
   );
+});
+
+// TODO: Routes
+app.use('/auth', routes.authRoutes);
+app.use('/employees', passport.authenticate('jwt', { session: false }), routes.employeeRoutes);
+
+
+// Catch all error handler
+app.use((err, req, res, next) => {
+  logger.error(err.stack);
+  res.status(500).send('Internal servern error!');
 });
 
 app.listen(port, (err) => {
