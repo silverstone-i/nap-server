@@ -38,8 +38,8 @@ router.get('/:id', passport.authenticate('jwt', { session: false }), async (req,
 
 router.post('/', /*passport.authenticate('jwt', { session: false }),*/ async (req, res) => {
   const dto = req.body;
+  dto.created_by = req.user.email;
   try {
-    console.log('Adding employee:', db.employees.cs);
    await db.employees.insert( dto );
    res
      .status(201)
