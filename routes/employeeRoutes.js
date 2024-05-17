@@ -36,18 +36,17 @@ router.get('/:id', passport.authenticate('jwt', { session: false }), async (req,
   }
 });
 
-router.post('/', passport.authenticate('jwt', { session: false }), async (req, res) => {
-  const { name, email, phone, title } = req.body;
-  if (!name || !email || !phone || !title) {
-    return res.status(400).send({ message: 'Missing required fields' });
-  }
+router.post('/', /*passport.authenticate('jwt', { session: false }),*/ async (req, res) => {
+  const dto = req.body;
   try {
-    const result = await db.one('INSERT INTO employees(name, email, phone, title) VALUES($1, $2, $3, $4) RETURNING id', [name, email, phone, title]);
-    console.log(`Employee added with ID: ${result.id}`);
-    res.status(201).send({ message: 'Employee added successfully', employeeId: result.id });
+    console.log('Adding employee:', db.employees.cs);
+   await db.employees.insert( dto );
+   res
+     .status(201)
+     .send({ message: 'Employee added successfully - employee email: ' + dto.email});
   } catch (error) {
     console.error('Error adding employee:', error.message, error.stack);
-    res.status(500).send('Error adding employee');
+    res.status(500).send('Error adding employee: ' + error.message);
   }
 }); 
 

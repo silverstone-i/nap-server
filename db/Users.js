@@ -9,7 +9,7 @@ class Users extends Model {
       columns: {
         id: { type: 'serial', primaryKey: true },
         email: { type: 'varchar(255)' },
-        password: { type: 'varchar(50)' },
+        password: { type: 'varchar(100)' },
         role: { type: 'varchar(50)', nullable: true },
         employee_id: { type: 'integer', nullable: true },
         archived: { type: 'boolean', default: false },

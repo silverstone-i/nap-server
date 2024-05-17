@@ -23,7 +23,7 @@ const options = {
 passport.use(
   new JwtStrategy(options, (jwt_payload, done) => {
     console.log('Processing JWT authentication for user ID:', jwt_payload.id);
-    db.oneOrNone('SELECT id, username, role FROM users WHERE id = $1', [
+    db.oneOrNone('SELECT id, email, role FROM users WHERE id = $1', [
       jwt_payload.id,
     ])
       .then((user) => {

@@ -5,6 +5,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const { createLogger, format, transports } = require('winston');
 const passport = require('./auth/passportSetup');
+const jwtStrategy = require('./auth/jwtStrategy'); // Importing JWT strategy setup
 const routes = require('./routes/routes');
 
 
@@ -35,16 +36,13 @@ const logger = createLogger({
 });
 
 app.use(morgan('dev'));
+//! FIX: morgan is not logging to the combined.log file
 // app.use(morgan('combined', { stream: logger.stream }));
 
-app.use(cors(corsOptions));
+app.use(cors(/*corsOptions*/));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-
-
-
-
+app.use(passport.initialize());
 
 // Simple test of "/" route - sytem health check
 app.get('/', (req, res) => {
