@@ -1,6 +1,18 @@
+'/server.js'
+
+/**
+*
+* Copyright © 2024-present, Ian Silverstone
+*
+* See the LICENSE file at the top-level directory of this distribution
+* for licensing information.
+*
+* Removal or modification of this copyright notice is prohibited.
+*/
+
 require('dotenv').config();
-const app = require('express')();
-const bodyParser = require('body-parser');
+const express = require('express');
+const app = express();
 const cors = require('cors');
 const morgan = require('morgan');
 const { createLogger, format, transports } = require('winston');
@@ -40,8 +52,8 @@ app.use(morgan('dev'));
 // app.use(morgan('combined', { stream: logger.stream }));
 
 app.use(cors(/*corsOptions*/));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 
 // Simple test of "/" route - sytem health check
