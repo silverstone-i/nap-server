@@ -16,8 +16,6 @@ const app = express();
 const cors = require('cors');
 const morgan = require('morgan');
 const { createLogger, format, transports } = require('winston');
-const passport = require('./auth/passportSetup');
-const jwtStrategy = require('./auth/jwtStrategy'); // Importing JWT strategy setup
 const routes = require('./routes/routes');
 
 
@@ -54,7 +52,9 @@ app.use(morgan('dev'));
 app.use(cors(/*corsOptions*/));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(passport.initialize());
+
+app.use('/', routes.authRoutes);
+app.use('/employees', routes.employeeRoutes);
 
 // Simple test of "/" route - sytem health check
 app.get('/', (req, res) => {
@@ -64,8 +64,6 @@ app.get('/', (req, res) => {
 });
 
 // TODO: Routes
-app.use('/auth', routes.authRoutes);
-app.use('/employees', passport.authenticate('jwt', { session: false }), routes.employeeRoutes);
 
 
 // Catch all error handler

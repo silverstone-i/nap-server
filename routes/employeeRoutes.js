@@ -11,11 +11,10 @@
 */
 
 const router = require('express').Router();
-const jwt = require('jsonwebtoken');
 const passport = require('passport');
-const db = require('../db/dbConfig');
+const db = require('../config/dbConfig');
 
-router.get('/', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const employees = await db.any('SELECT * FROM employees');
     res.status(200).send(employees);
@@ -25,7 +24,7 @@ router.get('/', passport.authenticate('jwt', { session: false }), async (req, re
   }
 });
 
-router.get('/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const employee = await db.one('SELECT * FROM employees WHERE id = $1', [id]);
@@ -36,7 +35,7 @@ router.get('/:id', passport.authenticate('jwt', { session: false }), async (req,
   }
 });
 
-router.post('/', /*passport.authenticate('jwt', { session: false }),*/ async (req, res) => {
+router.post('/',  async (req, res) => {
   const dto = req.body;
   dto.created_by = req.user.email;
   try {
@@ -50,7 +49,7 @@ router.post('/', /*passport.authenticate('jwt', { session: false }),*/ async (re
   }
 }); 
 
-router.put('/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.put('/:id', async (req, res) => {
   const { name, email, phone, title } = req.body;
   const { id } = req.params;
   if (!name || !email || !phone || !title) {
