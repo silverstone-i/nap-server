@@ -7,7 +7,7 @@ class Employees extends Model {
     super(db, pgp, {
       tableName: 'employees',
       columns: {
-        id: { type: 'serial', primaryKey: true },
+        id: { type: 'uuid', primaryKey: true, default: 'uuid_generate_v4()' },
         first_name: { type: 'varchar(255)' },
         last_name: { type: 'varchar(255)' },
         email: { type: 'varchar(255)'},
