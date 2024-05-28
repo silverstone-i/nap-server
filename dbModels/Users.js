@@ -2,6 +2,7 @@
 
 const { Model } = require('nap-db');
 
+
 class Users extends Model {
   constructor(db, pgp) {
     super(db, pgp, {
@@ -26,6 +27,17 @@ class Users extends Model {
         users_email: { columns: ['email'] },
       },
     });
+  }
+
+  async login(email) {
+    try {
+      let qLogin = `SELECT * FROM login WHERE email = ${email} AND archived = false;`;
+      const user = await this.db.oneOrNone(qLogin);
+      return user;
+    } catch (error) {
+      console.error('Error logging in user:', error.message, error.stack);
+      throw new Error(error.message);
+    }
   }
 }
 

@@ -15,21 +15,12 @@ const Users = require('../dbModels/Users');
 const Employees = require('../dbModels/Employees');
 require('dotenv').config();
 
-// Initialize the database
-const connection = {
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-};
-
 // Initialize the repositories
 const repositories = {
   employees: Employees,
   users: Users,
 };
 
-const db = DB.init(connection, repositories);
+const db = DB.init(process.env.DATABASE_URL, repositories);
 
 module.exports = db;

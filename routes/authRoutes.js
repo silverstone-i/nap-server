@@ -16,15 +16,19 @@ const passport = require('passport');
 const db = require('../config/dbConfig');
 
 router.post('/register', async (req, res) => {
+  if(!req.isAuthenticated()) {
+    return res.status(401).send({ message: 'Unauthorized' });
+  }
   const { email, password, role } = req.body;
   if (!email || !password || !role) {
     return res.status(400).send({ message: 'Missing required fields' });
   }
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('USER', req.user);
     const result = await db.one(
-      'INSERT INTO users(username, password_hash, email, role) VALUES($1, $2, $3, $4) RETURNING id',
-      [username, hashedPassword, email, role]
+      'INSERT INTO users(password, email, role, created_by) VALUES($1, $2, $3, $4) RETURNING id',
+      [ hashedPassword, email, role, 'nap_admin']
     );
     console.log(`User registered with ID: ${result.id}`);
     res
@@ -36,50 +40,14 @@ router.post('/register', async (req, res) => {
   }
 });
 
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  console.log('LOGIN', email, password);
-  if (!email || !password) {
-    return res.status(400).send({ message: 'Missing email or password' });
-  }
-  try {
-    const dto = {
-      id: '',
-      login_email: email,
-      email: '',
-      password: '',
-      role: '',
-      archived: '',
-      _condition: 'WHERE email = ${login_email}',
-    };
-
-    const result = await db.users.select(dto);
-    user = result[0];
-
-    // const user = await db.oneOrNone('SELECT id, email, password_hash, role, archived FROM users WHERE email = $1', [email]);
-    if (!user || user.archived) {
-      console.log(`No user found with email: ${email}`);
-      return res.status(401).send({ message: 'Incorrect email or password' });
-    }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (isMatch) {
-      console.log("USER MATCH", user);
-      return res.sendStatus(200);
-    } else {
-      console.log(`Password mismatch for email: ${email}`);
-      res.status(401).send({ message: 'Incorrect email or password' });
-    }
-  } catch (error) {
-    console.error('Error during user login:', error.message, error.stack);
-    res.status(500).send('Error logging in user');
-  }
+router.post('/login', passport.authenticate('local'), (req, res) => {
+  const user = req.user;
+  console.log('LOGIN', user.email);
+  res.status(200).send({ message: `User: ${user.email}` });
 });
 
-router.get(
-  '/validate',
-  (req, res) => {
-    res.status(200).send({ message: 'Token is valid', user: req.user });
-  }
-);
+router.get('/validate', (req, res) => {
+  res.status(200).send({ message: 'Token is valid', user: req.user });
+});
 
 module.exports = router;

@@ -12,7 +12,7 @@
 
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const db = require('./config/dbConfig');
+const db = require('./dbConfig');
 const bcrypt = require('bcrypt');
 
 const customFields = {
@@ -21,21 +21,15 @@ const customFields = {
 };
 
 const verify = (email, password, done) => {
-  const dto = {
-    id: null,
-    email: email,
-    password: '',
-    role: '',
-    _condition: `WHERE email = ${email} AND archived = false`
-  }
 
-  db.users.select({ username: username })
+  db.users.login(email)
     .then((user) => {
       if (!user || !bcrypt.compareSync(password, user.password)) {
         return done(null, false, {
           message: 'Incorrect username or password.',
         });
       } else {
+        delete user.password;
         return done(null, user);
       }
     })
@@ -49,6 +43,30 @@ const strategy = new LocalStrategy(customFields, verify);
 passport.use(strategy);
 
 // Passport Serialize and Deserialize user
+
+passport.serializeUser((user, done) => {
+  // console.log('SERIALIZE', user);
+  done(null, user.id);
+});
+
+passport.deserializeUser((userId, done) => {
+  // console.log('DESERIALIZE', userId);
+  const dto = {
+    id: userId,
+    email: '',
+    role: '',
+    employee_id: '',
+    _condition: `WHERE id = ${userId} AND archived = false`
+  }
+
+  db.users.select(dto)
+      .then((user) => {
+        done(null, user);
+      })
+      .catch(err => done(err))
+});
+
+module.exports = passport;
 
 
 
