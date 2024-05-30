@@ -12,6 +12,8 @@
 
 
 const { Model } = require('nap-db');
+const bcrypt = require('bcrypt');
+require('dotenv').config();
 
 
 class Users extends Model {
@@ -50,6 +52,24 @@ class Users extends Model {
       throw new Error(error.message);
     }
   }
+
+  async registerUser(dto) {
+    try {
+      const salt = +process.env.SALT_ROUNDS;
+      dto.password = await bcrypt.hash(dto.password, salt);
+
+      return await this.insert(dto);
+    } catch (error) {
+      console.error('Error registering user:', error.message, error.stack);
+      throw new Error(error.message);
+    }
+  }
+
+  print() {
+    console.log('SALT_ROUNDS', process.env.SALT_ROUNDS);
+  }
 }
+
+
 
 module.exports = Users;

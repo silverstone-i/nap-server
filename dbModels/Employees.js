@@ -28,7 +28,7 @@ class Employees extends Model {
         archived: { type: 'boolean', default: false },
       },
       uniqueConstraints: {
-        empoyees_email: { columns: ['email'] },
+        employees_email: { columns: ['email'] },
       },
     });
   }

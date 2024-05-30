@@ -20,13 +20,47 @@ class Addresses extends Model {
         id: { type: 'uuid', primaryKey: true, default: 'uuid_generate_v4()' },
         owner_type: { type: 'varchar(50)' },
         description: { type: 'varchar(25)' },
-        address: { type: 'varchar(255)' }
+        address: { type: 'varchar(255)' },
       },
       constraints: {
-        chk_owner_type: "CHECK (owner_type IN ('employee', 'vendor', 'customer'))"
+        chk_owner_type:
+          "CHECK (owner_type IN ('employee', 'vendor', 'customer'))",
+        unique_address: "UNIQUE('owner_type', 'description', 'address')",
       },
     });
   }
+
+  async insertReturning(dto) {
+    try {
+      const returning = 'RETURNING id';
+      delete dto.returning;
+      const inputValuesArray = await this.createInputValuesArray(dto);
+
+      const query =
+        this.pgp.helpers.insert(inputValuesArray, this.cs.insert) + returning;
+
+      const addresses = await this.db.many(query);
+      console.log('ADDRESSES', addresses);
+      return addresses;
+    } catch (error) {
+      console.error('Error inserting record:', error.message, error.stack);
+      throw new Error('Error inserting new address:', error.message);
+    }
+  }
+
+  async createInputValuesArray(dto) {
+    return dto.address.map((addr) => {
+      const description = Object.keys(addr)[0];
+      const valuesArray = {
+        owner_type: dto.owner_type,
+        description,
+        address: addr[description],
+        created_by: dto.created_by,
+      };
+      return valuesArray;
+    });
+  }
+
 }
 
 module.exports = Addresses;

@@ -21,8 +21,8 @@ const customFields = {
 };
 
 const verify = (email, password, done) => {
-
-  db.users.login(email)
+  db.users
+    .login(email)
     .then((user) => {
       if (!user || !bcrypt.compareSync(password, user.password)) {
         return done(null, false, {
@@ -35,7 +35,7 @@ const verify = (email, password, done) => {
     })
     .catch((err) => {
       done(err);
-    })
+    });
 };
 
 const strategy = new LocalStrategy(customFields, verify);
@@ -56,17 +56,16 @@ passport.deserializeUser((userId, done) => {
     email: '',
     role: '',
     employee_id: '',
-    _condition: `WHERE id = ${userId} AND archived = false`
-  }
+    _condition: 'WHERE id = ${id} AND archived = false',
+  };
 
-  db.users.select(dto)
-      .then((user) => {
-        done(null, user);
-      })
-      .catch(err => done(err))
+  const qUser =
+    'SELECT "id", "name", "email", "role", "employee_id" FROM login WHERE id = $1 AND archived = false;';
+  db.one(qUser, [userId])
+    .then((user) => {
+      done(null, user);
+    })
+    .catch((err) => done(err));
 });
 
 module.exports = passport;
-
-
-
