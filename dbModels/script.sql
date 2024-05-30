@@ -2,7 +2,7 @@
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-CREATE OR REPLACE FUNCTION "public"."nap_register_user"("email" varchar, "password" varchar)
+CREATE OR REPLACE FUNCTION "public"."nap_register_user_1"("email" varchar, "password" varchar)
   RETURNS "pg_catalog"."void" AS $BODY$
 DECLARE
     hashed_password VARCHAR(100);

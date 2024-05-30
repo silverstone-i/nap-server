@@ -40,7 +40,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-router.post('/login', passport.authenticate('local'), (req, res) => {
+router.post('/login/employee', passport.authenticate('local'), (req, res) => {
   const user = req.user;
   console.log('LOGIN', user.email);
   res.status(200).send({ message: `User: ${user.email}` });

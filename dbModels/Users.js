@@ -44,7 +44,8 @@ class Users extends Model {
 
   async login(email) {
     try {
-      let qLogin = `SELECT * FROM login WHERE email = ${email} AND archived = false;`;
+      let qLogin = `SELECT * FROM login WHERE email = '${email}' AND archived = false;`;
+      console.log('LOGIN', qLogin);
       const user = await this.db.oneOrNone(qLogin);
       return user;
     } catch (error) {

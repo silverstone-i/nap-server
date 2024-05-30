@@ -25,7 +25,7 @@ class Addresses extends Model {
       constraints: {
         chk_owner_type:
           "CHECK (owner_type IN ('employee', 'vendor', 'customer'))",
-        unique_address: "UNIQUE('owner_type', 'description', 'address')",
+        unique_address: "UNIQUE(owner_type, description, address)",
       },
     });
   }
