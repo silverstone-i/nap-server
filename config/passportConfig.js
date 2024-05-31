@@ -20,22 +20,46 @@ const customFields = {
   passwordField: 'password',
 };
 
-const verify = (email, password, done) => {
-  db.users
-    .login(email)
-    .then((user) => {
-      if (!user || !bcrypt.compareSync(password, user.password)) {
-        return done(null, false, {
-          message: 'Incorrect username or password.',
-        });
-      } else {
-        delete user.password;
-        return done(null, user);
-      }
-    })
-    .catch((err) => {
-      done(err);
-    });
+const verify = async (email, password, done) => {
+  // console.log('Verify function called');
+  if (!email || !password) {
+    return done(null, false, { message: 'Missing required fields' });
+  }
+
+  try {
+    const dto = {
+      id: '',
+      email: email,
+      name: '',
+      password_hash: '',
+      role: '',
+      _condition:
+        'WHERE email = ${email} AND is_user = true AND archived = false',
+    };
+
+    const employee = await db.employees.selectOne(dto);
+
+    if (!employee) {
+      return done(null, false, { message: 'Incorrect user or password' });
+    }
+
+    const isValidPassword = await bcrypt.compare(
+      password,
+      employee.password_hash
+    );
+
+    if (!isValidPassword) {
+      return done(null, false, { message: 'Incorrect user or password' });
+    }
+
+    delete employee.password_hash;
+    employee.email = email;
+
+    return done(null, employee);
+  } catch (error) {
+    console.error('Error verifying user:', error.message, error.stack);
+    return done(error);
+  }
 };
 
 const strategy = new LocalStrategy(customFields, verify);
@@ -45,27 +69,32 @@ passport.use(strategy);
 // Passport Serialize and Deserialize user
 
 passport.serializeUser((user, done) => {
-  // console.log('SERIALIZE', user);
+  console.log('SERIALIZE', user);
   done(null, user.id);
 });
 
-passport.deserializeUser((userId, done) => {
-  // console.log('DESERIALIZE', userId);
+passport.deserializeUser(async (userId, done) => {
+  console.log('DESERIALIZE', userId);
   const dto = {
     id: userId,
     email: '',
     role: '',
-    employee_id: '',
-    _condition: 'WHERE id = ${id} AND archived = false',
+    name: '',
+    _condition: 'WHERE id = ${id} AND is_user = true AND archived = false',
   };
 
-  const qUser =
-    'SELECT "id", "name", "email", "role", "employee_id" FROM login WHERE id = $1 AND archived = false;';
-  db.one(qUser, [userId])
-    .then((user) => {
-      done(null, user);
-    })
-    .catch((err) => done(err));
+  try {
+    const employee = await db.employees.selectOne(dto);
+    if (!employee) {
+      return done(null, false);
+    } else {
+      employee.id = userId;
+      return done(null, employee);
+    }
+  } catch (error) {
+    console.error('Error deserializing user:', error.message, error.stack);
+    done(error);
+  }
 });
 
 module.exports = passport;

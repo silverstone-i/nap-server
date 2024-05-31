@@ -11,43 +11,26 @@
  */
 
 const router = require('express').Router();
-const bcrypt = require('bcrypt');
 const passport = require('passport');
-const db = require('../config/dbConfig');
 
-router.post('/register', async (req, res) => {
-  if(!req.isAuthenticated()) {
-    return res.status(401).send({ message: 'Unauthorized' });
-  }
-  const { email, password, role } = req.body;
-  if (!email || !password || !role) {
-    return res.status(400).send({ message: 'Missing required fields' });
-  }
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    console.log('USER', req.user);
-    const result = await db.one(
-      'INSERT INTO users(password, email, role, created_by) VALUES($1, $2, $3, $4) RETURNING id',
-      [ hashedPassword, email, role, 'nap_admin']
-    );
-    console.log(`User registered with ID: ${result.id}`);
-    res
-      .status(201)
-      .send({ message: 'User registered successfully', userId: result.id });
-  } catch (error) {
-    console.error('Error registering new user:', error.message, error.stack);
-    res.status(500).send('Error registering new user');
-  }
-});
-
-router.post('/login/employee', passport.authenticate('local'), (req, res) => {
-  const user = req.user;
-  console.log('LOGIN', user.email);
-  res.status(200).send({ message: `User: ${user.email}` });
-});
-
-router.get('/validate', (req, res) => {
-  res.status(200).send({ message: 'Token is valid', user: req.user });
+router.post('/login/employee', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      console.error('Error authenticating employee:', err.message, err.stack);
+      return res.status(500).send({ message: 'Internal server error' });
+    }
+    if (!user) {
+      console.error('Error authenticating employee:', info.message);
+      return res.status(401).send({ message: 'Incorrect user or password' });
+    }
+    req.login(user, (err) => {
+      if (err) {
+        console.error('Error logging in employee:', err.message);
+        return res.status(500).send({ message: 'Internal server error' });
+      }
+    });
+    return res.status(200).send({ message: `Wecome ${user.name}!` });
+  })(req, res, next);
 });
 
 module.exports = router;
