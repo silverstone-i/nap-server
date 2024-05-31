@@ -18,14 +18,18 @@ class Addresses extends Model {
       tableName: 'addresses',
       columns: {
         id: { type: 'uuid', primaryKey: true, default: 'uuid_generate_v4()' },
-        owner_type: { type: 'varchar(50)' },
-        description: { type: 'varchar(25)' },
+        stakeholder_id: { type: 'uuid' },
+        stakeholder_type: { type: 'varchar(20)' },
+        location: { type: 'varchar(25)' },
         address: { type: 'varchar(255)' },
       },
       constraints: {
-        chk_owner_type:
-          "CHECK (owner_type IN ('employee', 'vendor', 'customer'))",
-        unique_address: "UNIQUE(owner_type, description, address)",
+        ch_stakeholder_type:
+          "CHECK (stakeholder_type IN ('employee', 'vendor', 'customer'))",
+        fk_employee_id: 'FOREIGN KEY (stakeholder_id) REFERENCES employees(id)',
+        fk_employee_id: 'FOREIGN KEY (stakeholder_id) REFERENCES employees(id)',
+        fk_vendor_id: 'FOREIGN KEY (stakeholder_id) REFERENCES vendors(id)',
+        fk_customer_id: 'FOREIGN KEY (stakeholder_id) REFERENCES customers(id)',
       },
     });
   }
@@ -60,7 +64,6 @@ class Addresses extends Model {
       return valuesArray;
     });
   }
-
 }
 
 module.exports = Addresses;

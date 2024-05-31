@@ -12,14 +12,15 @@
 
 const db = require('../config/dbConfig');
 
+console.log(db.addresses.createTableQuery());
+
 // Create the tables
 const createTables = async () => {
   console.log('Creating tables...');
   await db.employees.init();
-  // await db.users.init();
-  // await db.vendors.init();
-  // await db.addresses.init();
-  // await db.customers.init();
+  await db.vendors.init();
+  await db.customers.init();
+  await db.addresses.init();
   // await db.vendorAddresses.init();
   // await db.employeeAddresses.init();
   // await db.customerAddresses.init();
