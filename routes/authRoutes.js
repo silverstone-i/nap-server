@@ -28,9 +28,10 @@ router.post('/login/employee', (req, res, next) => {
         console.error('Error logging in employee:', err.message);
         return res.status(500).send({ message: 'Internal server error' });
       }
+      return res.status(200).send({ message: `Wecome ${user.name}!` });
     });
-    return res.status(200).send({ message: `Wecome ${user.name}!` });
   })(req, res, next);
 });
+
 
 module.exports = router;

@@ -14,6 +14,7 @@ const router = require('express').Router();
 const passport = require('passport');
 const db = require('../config/dbConfig');
 const isAuthenticated = require('../midlewares/auth-middleware');
+const bcrypt = require('bcrypt');
 
 router.get('/', async (req, res) => {
   try {
@@ -40,44 +41,44 @@ router.get('/:id', async (req, res) => {
 
 // Create a new employee record
 router.post('/', isAuthenticated, async (req, res) => {
-  const { employee, address, user } = req.body;
+  const { employee, address } = req.body;
+  console.log('NEW EMPLOYEE', employee, address);
 
   // Add created_by field to each record
   employee.created_by = req.user.name;
   address.created_by = req.user.name;
-  user.created_by = req.user.name;
 
   // RETURN the id of the new employee record
   employee.returning = 'RETURNING id';
   address.returning = 'RETURNING id';
 
   try {
+    if (employee.is_user) {
+      employee.password_hash = await bcrypt.hash(
+        employee.password,
+        +process.env.SALT_ROUNDS
+      );
+      delete employee.password;
+    }
+    console.log('EMPLOYEE', employee);
     const employeeId = await db.employees.insertReturning(employee);
-
-    // Insert address record
-    if (address) {
-      const addresses = await db.addresses.insertReturning(address);
-      const junctionData = addresses.map((addr) => {
-        return {
-          employee_id: employeeId.id,
-          address_id: addr.id,
-          created_by: req.user.name,
-        };
-      });
-
-      await db.employeeAddresses.insert(junctionData);
-    }
-
-    //  Add as user if employee is also a user
-    if (user) {
-      user.employee_id = employeeId.id;
-      await db.users.registerUser(user);
-    }
-
-    res.status(201).send({ message: 'Employee created successfully' });
   } catch (error) {
-    console.error('Error adding employee:', error.message, error.stack);
-    res.status(500).send('Error adding employee: ' + error.message);
+    console.error('Error inserting employee:', error.message, error.stack);
+    res.status(500).send({ message: 'Error creating new employee' });
+  }
+  // Insert address record
+  if (address) {
+    try {
+      address.stakeholder_id = employeeId[0].id;
+      address.stakeholder_type = 'employee';
+
+      const addresses = await db.addresses.insertReturning(address);
+      console.log('ADDRESSES', addresses);
+      return res.status(201).send({ message: 'Employee created successfully' });
+    } catch (error) {
+      console.error('Error inserting address:', error.message, error.stack);
+      return res.status(500).send({ message: 'Error creating new address' });
+    }
   }
 });
 

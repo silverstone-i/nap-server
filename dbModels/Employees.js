@@ -1,15 +1,14 @@
-'./dbModels/Employees.js'
+'./dbModels/Employees.js';
 
 /**
-*
-* Copyright © 2024-present, Ian Silverstone
-*
-* See the LICENSE file at the top-level directory of this distribution
-* for licensing information.
-*
-* Removal or modification of this copyright notice is prohibited.
-*/
-
+ *
+ * Copyright © 2024-present, Ian Silverstone
+ *
+ * See the LICENSE file at the top-level directory of this distribution
+ * for licensing information.
+ *
+ * Removal or modification of this copyright notice is prohibited.
+ */
 
 const { Model } = require('nap-db');
 
@@ -26,7 +25,7 @@ class Employees extends Model {
         tax_id: { type: 'varchar(50)', nullable: true },
         is_user: { type: 'boolean', default: false },
         name: { type: 'varchar(255)', nullable: true },
-        password_hash: { type: 'varchar(255)', nullable: true},
+        password_hash: { type: 'varchar(255)', nullable: true },
         role: { type: 'varchar(50)', nullable: true },
         archived: { type: 'boolean', default: false },
       },
