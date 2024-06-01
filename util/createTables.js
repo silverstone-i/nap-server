@@ -20,10 +20,8 @@ const createTables = async () => {
   await db.employees.init();
   await db.vendors.init();
   await db.customers.init();
+  await db.projects.init();
   await db.addresses.init();
-  // await db.vendorAddresses.init();
-  // await db.employeeAddresses.init();
-  // await db.customerAddresses.init();
   console.log('Tables created');
   process.exit();
 };

@@ -15,6 +15,7 @@ const Employees = require('../dbModels/Employees');
 const Vendors = require('../dbModels/Vendors');
 const Addresses = require('../dbModels/Addresses');
 const Customers = require('../dbModels/Customers');
+const Projects = require('../dbModels/Projects');
 require('dotenv').config();
 
 // Initialize the repositories
@@ -22,6 +23,7 @@ const repositories = {
   employees: Employees,
   vendors: Vendors,
   customers: Customers,
+  projects: Projects,
   addresses: Addresses,
 };
 

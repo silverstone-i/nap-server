@@ -21,16 +21,18 @@ class Addresses extends Model {
         employee_id: { type: 'uuid', nullable: true, default: null },
         vendor_id: { type: 'uuid', nullable: true, default: null },
         customer_id: { type: 'uuid', nullable: true, default: null },
+        project_id: { type: 'uuid', nullable: true, default: null },
         stakeholder_type: { type: 'varchar(20)' },
         location: { type: 'varchar(25)' },
         address: { type: 'varchar(255)' },
       },
       constraints: {
         ch_stakeholder_type:
-          "CHECK (stakeholder_type IN ('employee', 'vendor', 'customer'))",
+          "CHECK (stakeholder_type IN ('employee', 'vendor', 'customer', 'project'))",
         fk_employee_id: 'FOREIGN KEY (employee_id) REFERENCES employees(id)',
         fk_vendor_id: 'FOREIGN KEY (vendor_id) REFERENCES vendors(id)',
         fk_customer_id: 'FOREIGN KEY (customer_id) REFERENCES customers(id)',
+        fk_project_id: 'FOREIGN KEY (project_id) REFERENCES projects(id)',
       },
     });
   }
