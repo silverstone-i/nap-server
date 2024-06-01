@@ -18,7 +18,9 @@ class Addresses extends Model {
       tableName: 'addresses',
       columns: {
         id: { type: 'uuid', primaryKey: true, default: 'uuid_generate_v4()' },
-        stakeholder_id: { type: 'uuid' },
+        employee_id: { type: 'uuid', nullable: true, default: null },
+        vendor_id: { type: 'uuid', nullable: true, default: null },
+        customer_id: { type: 'uuid', nullable: true, default: null },
         stakeholder_type: { type: 'varchar(20)' },
         location: { type: 'varchar(25)' },
         address: { type: 'varchar(255)' },
@@ -26,10 +28,9 @@ class Addresses extends Model {
       constraints: {
         ch_stakeholder_type:
           "CHECK (stakeholder_type IN ('employee', 'vendor', 'customer'))",
-        fk_employee_id: 'FOREIGN KEY (stakeholder_id) REFERENCES employees(id)',
-        fk_employee_id: 'FOREIGN KEY (stakeholder_id) REFERENCES employees(id)',
-        fk_vendor_id: 'FOREIGN KEY (stakeholder_id) REFERENCES vendors(id)',
-        fk_customer_id: 'FOREIGN KEY (stakeholder_id) REFERENCES customers(id)',
+        fk_employee_id: 'FOREIGN KEY (employee_id) REFERENCES employees(id)',
+        fk_vendor_id: 'FOREIGN KEY (vendor_id) REFERENCES vendors(id)',
+        fk_customer_id: 'FOREIGN KEY (customer_id) REFERENCES customers(id)',
       },
     });
   }
@@ -38,13 +39,14 @@ class Addresses extends Model {
     try {
       const returning = 'RETURNING id';
       delete dto.returning;
-      const inputValuesArray = await this.createInputValuesArray(dto);
+      const inputValuesArray = this.createInputValuesArray(dto);
 
       const query =
-        this.pgp.helpers.insert(inputValuesArray, this.cs.insert) + returning;
+        this.pgp.helpers.insert(inputValuesArray, this.cs.insert) +
+        ' ' +
+        returning;
 
       const addresses = await this.db.many(query);
-      console.log('ADDRESSES', addresses);
       return addresses;
     } catch (error) {
       console.error('Error inserting record:', error.message, error.stack);
@@ -52,15 +54,24 @@ class Addresses extends Model {
     }
   }
 
-  async createInputValuesArray(dto) {
+  createInputValuesArray(dto) {
     return dto.address.map((addr) => {
-      const description = Object.keys(addr)[0];
+      const location = Object.keys(addr)[0];
       const valuesArray = {
-        owner_type: dto.owner_type,
-        description,
-        address: addr[description],
+        stakeholder_type: dto.stakeholder_type,
+        location: location,
+        address: addr[location],
         created_by: dto.created_by,
       };
+
+      if (dto.employee_id) {
+        valuesArray.employee_id = dto.employee_id;
+      } else if (dto.vendor_id) {
+        valuesArray.vendor_id = dto.vendor_id;
+      } else if (dto.customer_id) {
+        valuesArray.customer_id = dto.customer_id;
+      }
+
       return valuesArray;
     });
   }

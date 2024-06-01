@@ -26,7 +26,6 @@ class Vendors extends Model {
         contact_email: { type: 'varchar(255)', nullable: true },
         is_user: { type: 'boolean', default: false },
         role: { type: 'varchar(50)', nullable: true },
-        default: "'vendor'",
         archived: { type: 'boolean', default: false },
       },
     });

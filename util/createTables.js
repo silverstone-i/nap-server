@@ -12,7 +12,7 @@
 
 const db = require('../config/dbConfig');
 
-console.log(db.addresses.createTableQuery());
+// console.log(db.vendors.createTableQuery());
 
 // Create the tables
 const createTables = async () => {

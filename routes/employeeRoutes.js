@@ -42,7 +42,6 @@ router.get('/:id', async (req, res) => {
 // Create a new employee record
 router.post('/', isAuthenticated, async (req, res) => {
   const { employee, address } = req.body;
-  console.log('NEW EMPLOYEE', employee, address);
 
   // Add created_by field to each record
   employee.created_by = req.user.name;
@@ -59,26 +58,21 @@ router.post('/', isAuthenticated, async (req, res) => {
         +process.env.SALT_ROUNDS
       );
       delete employee.password;
+
+      const employeeId = await db.employees.insertReturning(employee);
+
+      if (address) {
+        address.employee_id = employeeId.id;
+        address.stakeholder_type = 'employee';
+        await db.addresses.insertReturning(address);
+      }
+      return res.status(201).send({ message: 'Employee created successfully' });
     }
-    console.log('EMPLOYEE', employee);
-    const employeeId = await db.employees.insertReturning(employee);
   } catch (error) {
     console.error('Error inserting employee:', error.message, error.stack);
-    res.status(500).send({ message: 'Error creating new employee' });
-  }
-  // Insert address record
-  if (address) {
-    try {
-      address.stakeholder_id = employeeId[0].id;
-      address.stakeholder_type = 'employee';
-
-      const addresses = await db.addresses.insertReturning(address);
-      console.log('ADDRESSES', addresses);
-      return res.status(201).send({ message: 'Employee created successfully' });
-    } catch (error) {
-      console.error('Error inserting address:', error.message, error.stack);
-      return res.status(500).send({ message: 'Error creating new address' });
-    }
+    return res
+      .status(500)
+      .send({ message: `Unable to create new employee: ${error.message}` });
   }
 });
 
