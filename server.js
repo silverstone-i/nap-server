@@ -50,9 +50,13 @@ const logger = createLogger({
   ],
 });
 
-app.use(morgan('dev'));
-//! FIX: morgan is not logging to the combined.log file
-// app.use(morgan('combined', { stream: logger.stream }));
+// Create a custom stream for Morgan to use Winston
+const stream = {
+  write: (message) => logger.info(message.trim()),
+};
+
+// Setup Morgan to use the custom stream
+app.use(morgan('combined', { stream }));
 
 /**
  * -------------- CORS SETUP ----------------
